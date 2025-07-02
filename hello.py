@@ -8,7 +8,7 @@ import asyncio
 
 async def main():
     
-    print("Namaset from autogen-planatrip!")
+    print("Namaste from autogen-planatrip!")
 
     agent_llm = OllamaChatCompletionClient( # On Private Server
         model="gemma3:latest",
@@ -61,13 +61,17 @@ async def main():
     agents = [planner_agent, local_agent, language_agent, travel_summary_agent] # No ```tools```, using the agents directly
 
     # Using RoundRobinGroupChat to manage the conversation flow # Swarm
-    group_chat = RoundRobinGroupChat(
+    trip_agent = RoundRobinGroupChat(
         agents, 
         termination_condition=termination
     )
 
     task = "Plan a 3 day trip to London. Do plan to visit a Caribbean Carnival if it is happening during the trip."
-    await Console(group_chat.run_stream(task=task)).run()
+    print(f"Task: {task}")
+
+    # Stream the conversation to the console
+    stream = trip_agent.run_stream(task=task)
+    await Console(stream)
 
     await agent_llm.close()
 
@@ -75,3 +79,4 @@ async def main():
 if __name__ == "__main__":
     print("Starting the autogen-planatrip application...")
     asyncio.run(main())
+    #Add ```tools``` to the agents, so that they can use them to get more information about the trip dynamically.
