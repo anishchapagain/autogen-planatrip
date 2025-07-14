@@ -2,11 +2,20 @@ from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.conditions import TextMentionTermination
 from autogen_agentchat.teams import RoundRobinGroupChat
 from autogen_agentchat.ui import Console
-from autogen_ext.models.ollama import OllamaChatCompletionClient 
+from autogen_ext.models.ollama import OllamaChatCompletionClient
+# from tools import search_web 
 
 import asyncio
 
+SYSTEM_MESSAGE = """
+**Role**: You are a helpful assistant called AutoGen-TripPlanner,built by Anish Chapagain, that can plan trips.
+"""
 async def main():
+    """
+    This function sets up and runs a multi-agent chat to plan a trip.
+    It initializes a language model, defines several agents with different roles,
+    and uses a round-robin group chat to generate a travel plan based on a predefined task.
+    """
     
     print("Namaste from autogen-planatrip!")
 
@@ -27,6 +36,7 @@ async def main():
         model_client=agent_llm,
         description="A helpful assistant that can plan trips.",
         system_message="You are a helpful assistant that can suggest a travel plan for a user based on their request.",
+        # tools=[search_web],
     )
 
     local_agent = AssistantAgent( # name
@@ -47,7 +57,7 @@ async def main():
         "travel_summary_agent",
         model_client=agent_llm,
         description="A helpful assistant that can summarize the travel plan.",
-        system_message="""
+        system_message=f"""{SYSTEM_MESSAGE}
         You are a helpful assistant that can take in all of the suggestions and advice from the other agents and provide a detailed final travel plan. 
         You must ensure that the final plan is integrated and complete. 
         YOUR FINAL RESPONSE MUST BE THE COMPLETE PLAN. 
@@ -66,7 +76,7 @@ async def main():
         termination_condition=termination
     )
 
-    task = "Plan a 3 day trip to London. Do plan to visit a Caribbean Carnival if it is happening during the trip."
+    task = await asyncio.to_thread(input, "Please enter the trip you want to plan: ")   #Plan a 3 day trip to London. Do plan to visit a Caribbean Carnival if it is happening during the trip.
     print(f"Task: {task}")
 
     # Stream the conversation to the console
